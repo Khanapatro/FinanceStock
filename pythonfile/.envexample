@@ -1,0 +1,2 @@
+CONNECTION_STRING="Endpoint=sb://<NAMESPACE>.servicebus.windows.net/;SharedAccessKeyName=<KEY_NAME>;SharedAccessKey=<SECRET_KEY>;EntityPath=<HUB_NAME>"
+EVENT_HUBNAME="EVENT_HUBNAME"
