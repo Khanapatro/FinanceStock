@@ -1,0 +1,9 @@
+stock_id,ticker,company_name,sector,exchange,base_price
+S001,AAPL,Apple Inc,Technology,NASDAQ,185.0
+S002,MSFT,Microsoft Corp,Technology,NASDAQ,415.0
+S003,TSLA,Tesla Inc,Automotive,NASDAQ,245.0
+S004,GOOGL,Alphabet Inc,Technology,NASDAQ,175.0
+S005,AMZN,Amazon.com Inc,Consumer,NASDAQ,185.0
+S006,JPM,JPMorgan Chase,Finance,NYSE,195.0
+S007,NVDA,NVIDIA Corp,Technology,NASDAQ,495.0
+S008,META,Meta Platforms,Technology,NASDAQ,355.0

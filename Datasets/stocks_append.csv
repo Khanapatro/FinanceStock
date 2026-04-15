@@ -1,0 +1,5 @@
+stock_id,ticker,company_name,sector,exchange,base_price
+S009,AMD,Advanced Micro Devices,Technology,NASDAQ,175
+S010,INTC,Intel Corp,Technology,NASDAQ,42
+S011,PYPL,PayPal Holdings,Finance,NASDAQ,68
+S012,UBER,Uber Technologies,Consumer,NYSE,78
