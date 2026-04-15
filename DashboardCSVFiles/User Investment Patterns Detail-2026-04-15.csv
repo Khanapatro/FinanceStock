@@ -1,0 +1,21 @@
+user_id,investor_type,total_txns,buy_txns,sell_txns,total_value_traded,avg_txn_value,avg_holding_days,txn_frequency,active_trading_days,unique_stocks_traded
+U007,High-Frequency Trader,36,20,16,305806.31,8494.62,6.5,1.04,34,6
+U016,Long-Term Investor,32,18,14,224105.96,7003.31,100.9,0.99,31,6
+U009,High-Frequency Trader,22,11,11,192110.37,8732.29,-180.8,0.62,22,4
+U002,Long-Term Investor,19,13,6,177309.04,9332.05,397.2,0.55,19,3
+U005,High-Frequency Trader,19,10,9,163819.19,8622.06,-128.6,0.54,19,5
+U015,High-Frequency Trader,22,14,8,140393.66,6381.53,-190.6,0.61,22,4
+U020,Long-Term Investor,21,13,8,135943.89,6473.52,146.7,0.64,21,4
+U004,Long-Term Investor,13,6,7,122659.72,9435.36,192.3,0.44,13,2
+U011,Long-Term Investor,16,12,4,117022.79,7313.92,155.3,0.56,16,4
+U012,High-Frequency Trader,16,10,6,112410.5,7025.66,-204.5,0.57,16,4
+U006,Long-Term Investor,14,9,5,106202.79,7585.91,337.7,0.47,14,4
+U003,Long-Term Investor,9,5,4,100658.81,11184.31,20.3,0.43,9,2
+U008,High-Frequency Trader,10,6,4,88868.36,8886.84,-750,0.31,10,3
+U018,Long-Term Investor,9,6,3,87352.78,9705.86,170.3,0.27,9,2
+U019,High-Frequency Trader,15,7,8,82471.17,5498.08,-144,0.49,15,3
+U017,Long-Term Investor,13,6,7,76104.21,5854.17,74.3,0.4,13,3
+U010,High-Frequency Trader,11,5,6,70281.03,6389.18,-149.5,0.32,11,3
+U013,High-Frequency Trader,11,7,4,65568.22,5960.75,-11,0.33,11,4
+U001,Long-Term Investor,15,9,6,63401.61,4226.77,119,0.45,15,3
+U014,High-Frequency Trader,6,0,6,36284.57,6047.43,0,0.24,6,3

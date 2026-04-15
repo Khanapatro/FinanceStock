@@ -1,0 +1,9 @@
+ticker,company_name,sector,total_profit,avg_roi_pct
+MSFT,Microsoft Corp,Technology,83199.81999999999,92.92
+GOOGL,Alphabet Inc,Technology,56160.64,56.58
+JPM,JPMorgan Chase,Finance,-1408.6799999999985,-1.5
+AAPL,Apple Inc,Technology,-4676.550000000002,-4.98
+AMZN,Amazon.com Inc,Consumer,-52764.8,-39.89
+TSLA,Tesla Inc,Automotive,-61249.76,-39.3
+META,Meta Platforms,Technology,-149477.30000000002,-30.47
+NVDA,NVIDIA Corp,Technology,-172504.91,-52.05
