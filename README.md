@@ -10,6 +10,7 @@
 
 ![Microsoft Azure](https://img.shields.io/badge/Microsoft_Azure-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 ![Databricks](https://img.shields.io/badge/Databricks-E84D0E?style=for-the-badge&logo=databricks&logoColor=white)
+![Azure Data Factory](https://img.shields.io/badge/Azure_Data_Factory-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 ![PySpark](https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
 ![Delta Lake](https://img.shields.io/badge/Delta_Lake-00ADA6?style=for-the-badge&logo=delta&logoColor=white)
 ![Azure Event Hubs](https://img.shields.io/badge/Azure_Event_Hubs-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
@@ -41,8 +42,8 @@
 | ⚙️ Processing Engine | Apache Spark (PySpark) via Databricks |
 | 🗃️ Storage Format | Delta Lake (Bronze / Silver / Gold) |
 | 🔴 Streaming Ingestion | Azure Event Hubs (Kafka-compatible) |
-| 📥 Batch Ingestion | Auto Loader (`cloudFiles`) |
-| 🔄 Orchestration | Apache Airflow |
+| 📥 Batch Ingestion | Azure Data Factory (ADF Pipelines) |
+| 🔄 Orchestration | Azure Data Factory |
 | 📊 Serving Layer | Star Schema (Fact + Dimension tables) |
 | 🐍 Language | Python 3.x |
 
@@ -94,7 +95,7 @@ FinanceStock/
              ▼                      ▼
 ┌──────────────────────────────────────────────────────────┐
 │  🟤 BRONZE  — Raw, append-only, no transforms            │
-│  Auto Loader cloudFiles → Delta Lake                     │
+│  ADF Copy Activity → Delta Bronze tables                 │
 │  CSV tables  +  Streaming TICK / CDC / OHLCV             │
 └──────────────────────────┬───────────────────────────────┘
                            │
@@ -115,7 +116,23 @@ FinanceStock/
 
 ---
 
-## ⚡ Event Generator — Azure Event Hubs
+## 📥 Batch Ingestion — Azure Data Factory
+
+All batch ingestion is handled by **Azure Data Factory** using Copy Activity pipelines. Each pipeline reads CSV files from the ADLS Gen2 raw container and loads them into the corresponding Bronze Delta table in Databricks.
+
+| Pipeline | Source File | Bronze Table |
+|---|---|---|
+| `pl_ingest_stocks` | stocks.csv | bronze.stocks |
+| `pl_ingest_prices` | prices.csv | bronze.prices |
+| `pl_ingest_portfolio` | portfolio.csv | bronze.portfolio |
+| `pl_ingest_transactions` | transactions.csv | bronze.transactions |
+| `pl_ingest_market_events` | market_events.csv | bronze.market_events |
+
+ADF **Storage Event Triggers** fire each pipeline automatically the moment a new file lands in the raw container — no manual triggering needed. ADF also handles retries, monitoring, and pipeline dependency chaining so the Silver notebooks only run after all Bronze loads are complete.
+
+---
+
+## ⚡ Streaming Ingestion — Azure Event Hubs
 
 The script connects to **Azure Event Hubs** and publishes three real-world financial event types:
 
@@ -130,6 +147,7 @@ pip install azure-eventhub
 python pythonfile/stock_event_generator.py
 # Select mode: 1=Tick  2=CDC  3=OHLCV  4=Mixed
 ```
+
 ---
 
 ## 🟡 Gold Layer — Star Schema
@@ -244,7 +262,7 @@ Dim_Date ── Fact_Portfolio_Snapshot ── Dim_Stock ── Dim_User
 
 | Layer | Strategy | Key Column |
 |---|---|---|
-| Bronze CSV | Auto Loader tracks files via checkpoint | File path |
+| Bronze CSV | ADF Copy Activity triggered on file arrival via Storage Event Trigger | File path |
 | Bronze Stream | Event Hubs offset tracking | `_eh_offset` |
 | Silver | Watermark on new Bronze rows only | `_ingested_at` |
 | Silver CDC | `MERGE INTO` Delta — upsert | `txn_id`, `portfolio_id` |
@@ -271,12 +289,11 @@ financestoragebablu/
       └── _checkpoints/          ← checkpoint + schemaLocation
 ```
 
-
 ---
 
 ## 🚀 How to Run
 
-**Prerequisites:** Databricks workspace (Runtime 11.3+), Azure Storage Account, Azure Event Hubs namespace, Python 3.8+
+**Prerequisites:** Databricks workspace (Runtime 11.3+), Azure Storage Account, Azure Event Hubs namespace, Azure Data Factory, Python 3.8+
 
 ```bash
 # Step 1 — Upload datasets to ADLS raw container
@@ -284,12 +301,12 @@ az storage blob upload-batch \
   --account-name financestoragebablu \
   --destination "raw/stocks" --source Datasets/ --pattern "stocks*.csv"
 
-# Step 2 — Generate events to Event Hubs
+# Step 2 — ADF Storage Event Trigger fires automatically on file arrival
+# Or manually trigger each pipeline from ADF Studio
+
+# Step 3 — Generate streaming events to Event Hubs
 pip install azure-eventhub
 python pythonfile/stock_event_generator.py   # Choose mode 4 (Mixed)
-
-# Step 3 — Run Bronze ingestion (Databricks)
-# Import Bronze/bronze_ingestion.py → Run All Cells
 
 # Step 4 — Run Silver transforms (Databricks)
 # Import Silver/ notebooks → Run All Cells
@@ -302,17 +319,20 @@ python pythonfile/stock_event_generator.py   # Choose mode 4 (Mixed)
 
 ## 📌 Key Design Decisions
 
+**Why Azure Data Factory for batch ingestion?**
+ADF provides a fully managed, no-code ingestion layer with built-in scheduling, monitoring, and retry logic. Storage Event Triggers allow pipelines to fire automatically the moment a new file lands in ADLS — no manual intervention needed. ADF also handles pipeline dependency chaining so downstream notebooks only run after ingestion is confirmed complete.
+
 **Why Delta Lake over Parquet?**
 ACID transactions, time travel (`VERSION AS OF`), schema evolution, and `MERGE INTO` for CDC upserts.
 
-**Why `availableNow=True` instead of `once=True`?**
-`trigger(once=True)` is deprecated in Databricks Runtime 11.3+. `availableNow=True` processes the full backlog then stops gracefully.
+**Why Azure Event Hubs for streaming?**
+Event Hubs is Kafka-compatible and natively integrates with Databricks Structured Streaming, making it the right choice for ingesting real-time financial events like ticks, CDC changes, and end-of-day candles.
 
 **Why schemaLocation inside checkpoint?**
 Keeps schema inference and stream offsets co-located. Resetting a checkpoint also resets schema — no orphaned files.
 
 **Why explicit schemas in Bronze?**
-Prevents Auto Loader from misreading column types on malformed files. Dates stay as `StringType` in Bronze — Silver does the safe cast.
+Prevents ADF and Spark from misreading column types on malformed files. Dates stay as `StringType` in Bronze — Silver does the safe cast.
 
 ---
 
@@ -323,5 +343,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">
-  <sub>Built with Apache Spark · Delta Lake · Azure Event Hubs · Databricks</sub>
+  <sub>Built with Azure Data Factory · Delta Lake · Azure Event Hubs · Databricks · PySpark</sub>
 </div>
