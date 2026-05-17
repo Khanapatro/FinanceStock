@@ -29,7 +29,7 @@
 
 ## 🗺️ Architecture Overview
 
-![Architecture Diagram](https://github.com/user-attachments/assets/e60fee24-24cb-4afc-9782-8246e3e1c611)
+![Architecture Diagram](https://github.com/user-attachments/assets/e7f4f4c6-531d-4d7e-b04e-8b2e7518eea3)
 
 ---
 
